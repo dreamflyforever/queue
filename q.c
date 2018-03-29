@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <list.h>
+#include <_list.h>
 #include <q.h>
 
 U8 msg_init(queue_t **obj, char *name, int count)
@@ -20,7 +20,7 @@ U8 msg_deinit(queue_t *obj)
 	return 0;
 }
 
-msg_t *msg_pack(char *buf, U8 size)
+msg_t *msg_pack(char *buf, U32 size)
 {
 	if (buf == NULL) {
 		printf("buf == NULL\n");
@@ -56,7 +56,7 @@ U8 msg_put(queue_t *obj, msg_t *msg)
 		printf("obj == NULL\n");
 		retval = -1;
 	}
-	list_insert_behind(&obj->head, &msg->list);
+	list_insert_behind(&obj->head, &(msg->list));
 	obj->index++;
 	return retval;
 }
@@ -70,75 +70,76 @@ msg_t *msg_get(queue_t *obj)
 	}
 	LIST *tmp = NULL;
 	tmp = &(obj->head);
-	while (!is_list_last(tmp)) {
+	if (!is_list_last(tmp)) {
 		msg = list_entry(tmp->next, msg_t, list);
-		print("msg buf: %s\n", msg->buf);
+		//printf("\n[%d]--------------------------------------------------\n", __LINE__);
+		if (msg->buf != NULL) {
+			print("msg buf: %s\n", msg->buf);
+		} else {
+			print("msg buf null\n");
+		}
+		//printf("\n[%d]--------------------------------------------------\n\n\n", __LINE__);
 		list_delete(tmp->next);
-		break;
+		obj->index--;
+	} else {
+		printf("[%s]message get nothing\n", __func__);
 	}
-	/*else {
-		retval = -1;
-	}*/
 end:
 	return msg;
 }
 
-U8 msg_put_buf(queue_t *obj, char *buf, U8 size)
+U8 msg_put_buf(queue_t *obj, char *buf, U32 size)
 {
 	int retval = 0;
 	msg_t *msg = msg_pack(buf, size);
 	if (msg == NULL) {
 		retval = -1;
+		print("no data\n");
 		goto end;
 	}
+	if (msg->buf != NULL) {
+		print("msg->buf : %s, msg->size: %d\n", msg->buf, msg->length);
+	} else {
+		print("msg->buf null");
+	}
 	retval = msg_put(obj, msg);
+	//printf("[%s]queue index: %d\n", __func__, obj->index);
+	//print_len(buf, size);
+	//char b[3 * 1024] = {0};
+	//printf("\n[%d]--------------------------------------------------\n", __LINE__);
+	//msg_get_buf(obj, b, 3 * 1024);
+	//printf("\n[%d]--------------------------------------------------\n\n\n", __LINE__);
 end:
 	return retval;
 }
 
-U8 msg_get_buf(queue_t *obj, char *buf, U8 size)
+U32 msg_get_buf(queue_t *obj, char *buf, U32 size)
 {
-	int retval = 0;
 	int len;
 	msg_t *msg;
 	msg = msg_get(obj);
-	if (msg == NULL) {
-		retval = -1;
+	if ((msg == NULL) || (buf == NULL)) {
+		len = -1;
 		goto end;
 	}
-	print("msg buf: %s\n", msg->buf);
+	//printf("[%s %d]queue index: %d\n", __func__, __LINE__, obj->index);
+	//print("msg buf: %s\n", msg->buf);
 
 	if (size > msg->length) len = msg->length;
 	else len = size;
 
 	memcpy(buf, msg->buf, len);
-	print("%s\n", buf);
 	msg_depack(msg);
 end:
-	return retval;
+	return len;
 }
 
-int main()
+U8 print_len(char *buf, int size)
 {
-	queue_t *obj;
-	msg_init(&obj, "helloworld", 100);
-	msg_put_buf(obj, "1", 1);
-	msg_put_buf(obj, "2", 1);
-	msg_put_buf(obj, "3", 1);
-	msg_put_buf(obj, "4", 1);
-	msg_put_buf(obj, "5", 1);
-	msg_put_buf(obj, "6", 1);
+	int i;
+	for (i = 0; i < size; i++) {
+		printf("%c", buf[i]);
+	}
 
-	char buf[1] = {0};
-	msg_get_buf(obj, buf, 1);
-	printf("%s\n", buf);
-	msg_get_buf(obj, buf, 1);
-	printf("%s\n", buf);
-	msg_get_buf(obj, buf, 1);
-	msg_get_buf(obj, buf, 1);
-	msg_get_buf(obj, buf, 1);
-	msg_get_buf(obj, buf, 1);
-	msg_get_buf(obj, buf, 1);
-	msg_deinit(obj);
 	return 0;
 }
