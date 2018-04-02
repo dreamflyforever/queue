@@ -61,7 +61,7 @@ void *thrd_func_write(void *arg)
 	}
 	fclose(wav);
 
-	return ;
+	return NULL;
 }
 
 void *thrd_func_read(void *arg)
@@ -78,7 +78,7 @@ void *thrd_func_read(void *arg)
 	}
 	printf("\n\n\n----------------\n\n\n");
 	fclose(tmp);
-	return ;
+	return NULL;
 }
 
 pthread_t tid1;

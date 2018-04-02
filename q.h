@@ -28,7 +28,7 @@ msg_t *msg_pack(char *buf, U32 size);
 U8 msg_depack(msg_t *msg);
 U8 print_len(char *buf, int size);
 
-#if 1
+#if 0
 #define print(format, ...) \
 	{printf("[%s : %d] ", \
 	__func__, __LINE__); \

@@ -72,17 +72,15 @@ msg_t *msg_get(queue_t *obj)
 	tmp = &(obj->head);
 	if (!is_list_last(tmp)) {
 		msg = list_entry(tmp->next, msg_t, list);
-		//printf("\n[%d]--------------------------------------------------\n", __LINE__);
 		if (msg->buf != NULL) {
 			print("msg buf: %s\n", msg->buf);
 		} else {
-			print("msg buf null\n");
+			//printf("msg buf null\n");
 		}
-		//printf("\n[%d]--------------------------------------------------\n\n\n", __LINE__);
 		list_delete(tmp->next);
 		obj->index--;
 	} else {
-		printf("[%s]message get nothing\n", __func__);
+		//printf("[%s]message get nothing\n", __func__);
 	}
 end:
 	return msg;
@@ -103,12 +101,6 @@ U8 msg_put_buf(queue_t *obj, char *buf, U32 size)
 		print("msg->buf null");
 	}
 	retval = msg_put(obj, msg);
-	//printf("[%s]queue index: %d\n", __func__, obj->index);
-	//print_len(buf, size);
-	//char b[3 * 1024] = {0};
-	//printf("\n[%d]--------------------------------------------------\n", __LINE__);
-	//msg_get_buf(obj, b, 3 * 1024);
-	//printf("\n[%d]--------------------------------------------------\n\n\n", __LINE__);
 end:
 	return retval;
 }
@@ -123,7 +115,7 @@ U32 msg_get_buf(queue_t *obj, char *buf, U32 size)
 		goto end;
 	}
 	//printf("[%s %d]queue index: %d\n", __func__, __LINE__, obj->index);
-	//print("msg buf: %s\n", msg->buf);
+	print("msg buf: %s\n", msg->buf);
 
 	if (size > msg->length) len = msg->length;
 	else len = size;
