@@ -16,6 +16,15 @@ U8 msg_init(queue_t **obj, char *name, int count)
 
 U8 msg_deinit(queue_t *obj)
 {
+	int ret = 0;
+	char buf[3200] = {0};
+	int size = 3200;
+	while (1) {
+		memset(buf, 0, 3200);
+		ret = msg_get_buf(obj, buf, size);
+		printf("%d\n", ret);
+		if (ret == -1) break;
+	}
 	free(obj);
 	return 0;
 }
