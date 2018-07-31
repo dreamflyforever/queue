@@ -4,12 +4,12 @@
 #include <_list.h>
 #include <q.h>
 
-U8 msg_init(queue_t **obj, char *name, int count)
+U8 msg_init(queue_t **obj, char *name, U32 size)
 {
 	*obj = malloc(sizeof(queue_t));
 	list_init(&(*obj)->head);
 	(*obj)->name = name;
-	(*obj)->count = count;
+	(*obj)->size = size;
 	(*obj)->index = 0;
 	return 0;
 }
@@ -17,10 +17,10 @@ U8 msg_init(queue_t **obj, char *name, int count)
 U8 msg_deinit(queue_t *obj)
 {
 	int ret = 0;
-	char buf[3200] = {0};
-	int size = 3200;
+	int size = 1124;
+	char buf[1124] = {0};
 	while (1) {
-		memset(buf, 0, 3200);
+		memset(buf, 0, 1124);
 		ret = msg_get_buf(obj, buf, size);
 		printf("%d\n", ret);
 		if (ret == -1) break;
@@ -98,6 +98,11 @@ end:
 U8 msg_put_buf(queue_t *obj, char *buf, U32 size)
 {
 	int retval = 0;
+	if (obj->size <= obj->count) {
+		print("queue is full, max buffer size is %d\n", obj->size);
+		retval = -1;
+		goto end;
+	}
 	msg_t *msg = msg_pack(buf, size);
 	if (msg == NULL) {
 		retval = -1;
@@ -110,6 +115,7 @@ U8 msg_put_buf(queue_t *obj, char *buf, U32 size)
 		print("msg->buf null");
 	}
 	retval = msg_put(obj, msg);
+	obj->count += size;
 end:
 	return retval;
 }
@@ -131,6 +137,9 @@ U32 msg_get_buf(queue_t *obj, char *buf, U32 size)
 
 	memcpy(buf, msg->buf, len);
 	msg_depack(msg);
+	obj->size -= len;
+	if (obj->size < 0)
+		obj->size = 0;
 end:
 	return len;
 }

@@ -4,9 +4,10 @@
 #include "_list.h"
 typedef struct queue_str {
 	LIST head;
-	U8 count;
+	U32 size;
 	U8 *name;
 	U8 index;
+	U32 count;
 } queue_t;
 
 typedef struct msg_str {
@@ -16,7 +17,7 @@ typedef struct msg_str {
 	U8 *buf;
 } msg_t;
 
-U8 msg_init(queue_t **obj, char *name, int count);
+U8 msg_init(queue_t **obj, char *name, U32 size);
 U8 msg_put(queue_t *obj, msg_t *msg);
 msg_t *msg_get(queue_t *obj);
 U8 msg_deinit(queue_t *obj);
