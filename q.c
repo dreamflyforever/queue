@@ -11,6 +11,7 @@ U8 msg_init(queue_t **obj, char *name, U32 size)
 	(*obj)->name = name;
 	(*obj)->size = size;
 	(*obj)->index = 0;
+	(*obj)->count = 0;
 	return 0;
 }
 
