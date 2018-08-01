@@ -99,7 +99,7 @@ U8 msg_put_buf(queue_t *obj, char *buf, U32 size)
 {
 	int retval = 0;
 	if (obj->size <= obj->count) {
-		print("queue is full, max buffer size is %d\n", obj->size);
+		printf("queue is full, max buffer size is %d\n", obj->size);
 		retval = -1;
 		goto end;
 	}
@@ -137,9 +137,9 @@ U32 msg_get_buf(queue_t *obj, char *buf, U32 size)
 
 	memcpy(buf, msg->buf, len);
 	msg_depack(msg);
-	obj->size -= len;
-	if (obj->size < 0)
-		obj->size = 0;
+	obj->count -= len;
+	if (obj->count < 0)
+		obj->count = 0;
 end:
 	return len;
 }
