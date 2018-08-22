@@ -42,7 +42,6 @@ msg_t *msg_pack(char *buf, U32 size)
 	msg->buf = malloc(size);
 	memcpy(msg->buf, buf, size);
 	msg->length = size;
-	msg->type = 4;
 end:
 	return msg;
 }
