@@ -153,3 +153,14 @@ U8 print_len(char *buf, int size)
 
 	return 0;
 }
+
+U8 msg_is_empty(queue_t *obj)
+{
+	int retval = 0;
+	msg_t *msg;
+	msg = msg_get(obj);
+	if (msg == NULL) {
+		retval = 1;
+	}
+	return retval;
+}
