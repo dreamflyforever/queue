@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <q.h>
 #include <pthread.h>
+#include <unistd.h>
+
+#include "q.h"
+
 static FILE *wav;
 static FILE *tmp;
 void reverse(char s[])
@@ -39,21 +42,22 @@ void *thrd_func_write(void *arg)
 {
 	char buf[3200] = {0};
 	char *wavpath = "1.wav";
+	char *tmppath = "2.wav";
 	int bytes;
-	wav = fopen("1.wav", "rb");
-	tmp = fopen("2.wav", "wb");
-	if (!tmp) {
-		printf("open wav : %s failed\n", wavpath);
-		return 0;
+	wav = fopen(wavpath, "rb");
+	if (!wav) {
+		printf("open wav :%s failed\n", wavpath);
+		exit(0);
 	} else {
-		printf("open wav : %s success\n", wavpath);
+		printf("open wav :%s success\n", wavpath);
 	}
 
-	if (!wav) {
-		printf("open wav : %s failed\n", wavpath);
-		return 0;
+	tmp = fopen(tmppath, "wb");
+	if (!tmp) {
+		printf("open wav :%s failed\n", tmppath);
+		exit(0);
 	} else {
-		printf("open wav : %s success\n", wavpath);
+		printf("open wav :%s success\n", tmppath);
 	}
 
 	while ((bytes = fread(buf, 1, sizeof(buf), wav))) {
@@ -86,7 +90,7 @@ pthread_t tid2;
 
 int main()
 {
-	msg_init(&obj, "helloworld", 100);
+	msg_init(&obj, "helloworld", 100*1024*10);
 #if 0
 	if (pthread_create(&tid1, NULL, thrd_func_write, NULL)!=0) {
         	printf("Create thread error!\n");
