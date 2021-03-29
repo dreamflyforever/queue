@@ -18,15 +18,12 @@ typedef struct msg_str {
 } msg_t;
 
 U8 msg_init(queue_t **obj, char *name, U32 size);
-U8 msg_put(queue_t *obj, msg_t *msg);
-msg_t *msg_get(queue_t *obj);
 U8 msg_deinit(queue_t *obj);
 
 U8 msg_put_buf(queue_t *obj, char *buf, U32 size);
 U32 msg_get_buf(queue_t *obj, char *buf, U32 size);
 
-msg_t *msg_pack(char *buf, U32 size);
-U8 msg_depack(msg_t *msg);
+/*debug info*/
 U8 print_len(char *buf, int size);
 
 #if 0
