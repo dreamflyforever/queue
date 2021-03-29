@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <pthread.h>
 #include <unistd.h>
 
 #include "q.h"
+
+queue_t *obj;
 
 static FILE *wav;
 static FILE *tmp;
@@ -20,23 +21,6 @@ void reverse(char s[])
 	}
 }
 
-queue_t *obj;
-void itoa(int n, char s[])
-{
-	int i, sign;
-
-	if ((sign = n) < 0)  /* record sign */
-		n = -n;/* make n positive */
-	i = 0;
-	do {
-		/* generate digits in reverse order */
-		s[i++] = n % 10 + '0';   /* get next digit */
-	} while ((n /= 10) > 0); /* delete it */
-	if (sign < 0)
-		s[i++] = '-';
-	s[i] = '\0';
-	reverse(s);
-}
 
 void *thrd_func_write(void *arg)
 {
@@ -88,42 +72,69 @@ void *thrd_func_read(void *arg)
 pthread_t tid1;
 pthread_t tid2;
 
+static int _index;
+char EXPECT_OUTPUT[][100];
+char REAL_OUTPUT[][100];
+
+int INPUT(char *buf, int size)
+{
+	int retval = 0;
+	if (-1 != msg_put_buf(obj, buf, size)) {
+		retval = 1;
+		memcpy(&EXPECT_OUTPUT[_index][0], buf, size);
+		printf("input[%d]: %s\t", _index, &EXPECT_OUTPUT[_index][0]);
+		_index++;
+	}
+	printf("\t");
+	return retval;
+}
+
+int EXPECT_OUTPUT_QUEUE()
+{
+	int i;
+	char buf[1024] = {0};
+	for (i = 0; i < _index; i++) {
+		msg_get_buf(obj, buf, 1024);
+		memcpy(&REAL_OUTPUT[i][0], buf, 1024);
+		printf("real_output[%d]: %s\t", i, &REAL_OUTPUT[i][0]);
+		memset(&buf[0], 0, 1024);
+	}
+	return 0;
+}
+
+int COMPARE(char expect_output[][100], char real_output[][100])
+{
+	int i = 0;
+	int pass = 0;
+	for (i = 0; i < _index; i++) {
+		if (strncmp(expect_output[i],
+			real_output[i],
+			strlen(&expect_output[i][0])) == 0) {
+			pass++;
+		}
+	}
+	printf("\n\nAll Test Done!\n\n");
+	printf("\nResult: %2d/%2d [PASS/TOTAL]\n\n", pass, _index);
+	return 0;
+}
+
 int main()
 {
 	msg_init(&obj, "helloworld", 100*1024*10);
 #if 0
-	if (pthread_create(&tid1, NULL, thrd_func_write, NULL)!=0) {
-        	printf("Create thread error!\n");
-        	exit(1);
-	}
-
-	if (pthread_create(&tid2, NULL, thrd_func_read, NULL)!=0) {
-        	printf("Create thread error!\n");
-        	exit(1);
-	}
-#endif
-
 	thrd_func_write(NULL);
 	thrd_func_read(NULL);
-#if 0
-	msg_put_buf(obj, "1221346568523233", 10);
-	msg_put_buf(obj, "2", 1);
-	msg_put_buf(obj, "3", 1);
-	msg_put_buf(obj, "4", 1);
-	msg_put_buf(obj, "5", 1);
-	msg_put_buf(obj, "6", 1);
-
-	char buf[1] = {0};
-	msg_get_buf(obj, buf, 1);
-	printf("%s\n", buf);
-	msg_get_buf(obj, buf, 1);
-	printf("%s\n", buf);
-	msg_get_buf(obj, buf, 1);
-	msg_get_buf(obj, buf, 1);
-	msg_get_buf(obj, buf, 1);
-	msg_get_buf(obj, buf, 1);
-	msg_get_buf(obj, buf, 1);
-	msg_deinit(obj);
 #endif
+	printf("\n===============================================================================\n\n");
+
+	INPUT("12345", 5);
+	INPUT("abc", 3);
+	INPUT("aaaaaaaaaaaaaaa", 10);
+	INPUT("bbbbbbbbbbbbbbb", 10);
+	printf("\n");
+	EXPECT_OUTPUT_QUEUE();
+	COMPARE(EXPECT_OUTPUT, REAL_OUTPUT);
+	printf("\n===============================================================================\n\n");
+	msg_deinit(obj);
 	return 0;
 }

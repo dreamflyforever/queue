@@ -23,7 +23,8 @@ U8 msg_deinit(queue_t *obj)
 	while (1) {
 		memset(buf, 0, 1124);
 		ret = msg_get_buf(obj, buf, size);
-		printf("%d\n", ret);
+		/*debug info*/
+		/*printf("%d\n", ret);*/
 		if (ret == -1) break;
 	}
 	free(obj);
