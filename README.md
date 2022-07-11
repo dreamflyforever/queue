@@ -10,3 +10,6 @@ may handle it.
 
 ## author
 Jim, MIT
+
+## change log
+Add static allot circle queue, for quick operate it.
